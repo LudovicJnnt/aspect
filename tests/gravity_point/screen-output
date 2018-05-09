@@ -1,0 +1,29 @@
+-----------------------------------------------------------------------------
+-----------------------------------------------------------------------------
+
+Number of active cells: 96 (on 2 levels)
+Number of degrees of freedom: 4,030 (2,910+150+970)
+
+*** Timestep 0:  t=0 years
+   Solving temperature system... 0 iterations.
+   Rebuilding Stokes preconditioner...
+   Solving Stokes system... 111+0 iterations.
+
+   Postprocessing:
+     RMS, max velocity:                  0.108 m/year, 0.442 m/year
+     Temperature min/avg/max:            1380 K, 1595 K, 1854 K
+     Heat fluxes through boundary parts: 7.182e+09 W, -2.611e+10 W
+     gravity calculation file:           output-gravity_point/gravity_arrays.txt
+     Density at top/bottom of domain:    3301 kg/m^3, 3301 kg/m^3
+     Pressure at top/bottom of domain:   707 Pa, 9.538e+10 Pa
+     Computing dynamic topography        
+     Writing geoid anomaly:              output-gravity_point/geoid_anomaly.00000
+     Writing graphical output:           output-gravity_point/solution/solution-00000
+
+Termination requested by criterion: end time
+
+
++---------------------------------------------+------------+------------+
++---------------------------------+-----------+------------+------------+
++---------------------------------+-----------+------------+------------+
+

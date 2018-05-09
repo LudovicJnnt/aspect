@@ -1,0 +1,114 @@
+# A simple setup for gravity acceleration calculated at a point P
+# manual for more information.
+
+
+set Dimension                              = 3
+set End time                               = 0
+set Output directory                       = opt_gravity_at6500_im3
+
+
+
+subsection Geometry model
+  set Model name = spherical shell
+
+  subsection Spherical shell
+    set Inner radius  = 3481000
+    set Outer radius  = 6371000
+    set Cells along circumference = 12
+  end
+end
+
+
+
+subsection Boundary velocity model
+  set Zero velocity boundary indicators       = top, bottom
+end
+
+
+
+subsection Material model
+  set Model name = simple
+
+  subsection Simple model
+    set Reference density                 = 3300
+    set Viscosity                         = 1e21
+    set Thermal expansion coefficient     = 3e-5
+    set Reference temperature             = 1600
+    set Thermal conductivity              = 4.125 
+    set Reference specific heat           = 1250
+  end
+end
+
+
+
+subsection Boundary temperature model
+  set List of model names = spherical constant
+ 
+  subsection Spherical constant
+    set Inner temperature = 2000
+    set Outer temperature = 1000
+  end
+end
+
+
+
+subsection Initial temperature model
+  set Model name = S40RTS perturbation
+
+  subsection S40RTS perturbation
+    #set Function expression = 0
+    #set Data directory                    = ~/home/ludovic/aspect/aspect_2018-05-07/aspect/data/initial_temperature/S40RTS/
+    set Initial condition file name       = S40RTS.sph
+    set Spline knots depth file name      = Spline_knots.txt
+    set Remove degree 0 from perturbation = false
+    set Vs to density scaling             = 0.15
+    set Thermal expansion coefficient in initial temperature scaling = 3e-5
+    set Reference temperature             = 1600
+  end
+end
+
+
+
+subsection Gravity model
+  set Model name = radial constant
+
+  subsection Radial constant
+    set Magnitude  = 10
+  end
+end
+
+
+
+subsection Mesh refinement
+  set Initial global refinement          = 1
+end
+
+
+
+subsection Postprocess
+  set List of postprocessors = visualization, velocity statistics, temperature statistics, heat flux statistics, gravity calculation
+
+  subsection Visualization
+    set Output format                 = vtu
+    set List of output variables      = density, strain rate, geoid, heat flux map, dynamic topography
+    set Time between graphical output = 0
+    set Number of grouped files       = 1
+  end
+ 
+  subsection Gravity calculation
+    set Spherical spacing             = 180
+    set Satellite height              = 6500000
+    set Reference density             = 3300
+  end
+
+  subsection Depth average
+    set Time between graphical output = 2
+    set Output format                 = vtu
+  end
+end
+
+
+
+subsection Checkpointing
+  set Steps between checkpoint = 50
+end
