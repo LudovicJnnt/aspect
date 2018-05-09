@@ -64,7 +64,7 @@ namespace aspect
       const double G = aspect::constants::big_g;
       const double density_ref = reference_density;
       std_cxx11::array<double,dim> ecoord;       // create spherical coordinate array
-      ecoord[0]= satellite_height;               // satellite height [radius, , ];
+      ecoord[0]= satellite_height;               // satellite height [radius, , ]
       const double spacing = spherical_spacing;  // satellite cover resolution
 
       // now write all data to the file of choice. start with a pre-amble that
@@ -86,14 +86,6 @@ namespace aspect
         << "#12 gravity_diff (theoric-norm)" << '\n'
         << "#13 potential" << '\n'
         << '\n';
-      //const std::string filename2 = (this->get_output_directory() +
-      //                              "density_arrays1.txt");
-      //std::ofstream f2 (filename2.c_str());
-      //f2 << "#1 density_test1" << '\n';
-      //const std::string filename3 = (this->get_output_directory() +
-      //                              "density_arrays2.txt");
-      //std::ofstream f3 (filename3.c_str());
-      //f3 << "#1 density_test2" << '\n';
 
       // number of element per MPI
       int c = 0;
@@ -107,11 +99,7 @@ namespace aspect
       // allocate density vector in MPI         // both I am not sure they work
       int cell_n_q = c * n_q_points;
       std::vector<double> density_all;          // defining vector density_all to store density values
-      density_all.reserve(cell_n_q);            // OR
-      //int density_all[cell_n_q];              // defining array density_all to store density values
-      //f2 << c << '\n'
-      //   << n_q_points << '\n'
-      //   << cell_n_q << '\n';
+      density_all.reserve(cell_n_q); 
 
       c = 0;
       cell = this->get_dof_handler().begin_active();
@@ -125,11 +113,6 @@ namespace aspect
             for (unsigned int q = 0; q < n_q_points; ++q)
               {
                density_all[c*n_q_points+q]=out.densities[q];
-               //f2 << cell << ' ' 
-               //   << c << ' ' 
-               //   << c*n_q_points+q << ' '  
-               //   << density_all[c*n_q_points+q] << ' ' 
-               //   << out.densities[q] << '\n';
               }
             c += 1;
           }
@@ -167,15 +150,11 @@ namespace aspect
                                          (position_satellite[1]-position_point[q][1])*(position_satellite[1]-position_point[q][1]) +  
                                          (position_satellite[2]-position_point[q][2])*(position_satellite[2]-position_point[q][2]);  
 
-                          double KK = G * density_all[c*n_q_points+q] * fe_values.JxW(q) / pow(std::sqrt(dist),3); // density_all[c*q+q]
+                          double KK = G * density_all[c*n_q_points+q] * fe_values.JxW(q) / pow(std::sqrt(dist),3);
                           local_gx += KK * (position_satellite[0]-position_point[q][0]);  
                           local_gy += KK * (position_satellite[1]-position_point[q][1]);  
                           local_gz += KK * (position_satellite[2]-position_point[q][2]);
                           local_U -= G * density_all[c*n_q_points+q] * fe_values.JxW(q) / std::sqrt(dist);
-                          //f3 << cell << ' '
-                          //   << c << ' '
-                          //   << c*n_q_points+q << ' '  
-                          //   << density_all[c*n_q_points+q] << '\n'; // write value to check those
                         }
                       c += 1;
                     }
