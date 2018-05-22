@@ -80,6 +80,9 @@ namespace aspect
          * reference density of the all domain.
          */
         double reference_density;
+
+        std::vector<double> long_min_max;
+        std::vector<double> lat_min_max;
     };
   }
 }
