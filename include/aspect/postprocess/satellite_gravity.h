@@ -67,16 +67,26 @@ namespace aspect
 
       private:
         /**
-         * Gravity is calculated on a spherical surface (i.e. map at a height) at which points 
-         * are spaced according to the grid_spacing value in degree.
+         * Gravity is calculated on a spherical surface (i.e. map at a satellite height) 
+         * at which points are spaced according to the mapping_spherical_spacing value 
+         * in degree; same value for longitude and latitude.
          */
         double mapping_spherical_spacing;
-        double profile_height_spacing;
+        
+        /**
+         * Gravity is calculated for a depth-profile at which points 
+         * are spaced according to the profile_height_spacing value in meter.
+         */
+        double profile_depth_spacing;
 
         /**
-         * Height above the model surface (e.g., 'satellite height') at which the gravity is calculated.
+         * Height above the model surface at which the gravity for mapping is calculated.
          */
         double mapping_satellite_height;
+        
+        /**
+         * Maximum height above the model surface at which the gravity for depth-profile is calculated.
+         */
         double profile_satellite_height;
 
         /**
@@ -112,6 +122,17 @@ namespace aspect
          * The reference density used in the gravity calculation 
          */
         double reference_density;
+
+        /**
+         * Enumeration for selecting which type of viscous flow law to use.
+         * Select between mapping or profile.
+         */
+        enum gravity_calculation_type
+        {
+          profile,
+          mapping
+        } gravity_calculation_type;
+
     };
   }
 }
