@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2011 - 2018 by the authors of the ASPECT code.
+  Copyright (C) 2018 by the authors of the ASPECT code.
 
   This file is part of ASPECT.
 
@@ -32,18 +32,18 @@ namespace aspect
   {
 
     /**
-     * A postprocessor that computes gravity and potential for a set of points (e.g. satellites)
-     * above the model surface for a user-defined range of latitudes, longitudes and height. 
-     * A gravity depth-profile for a user-defined longitude and latitude is also possible. 
+     * A postprocessor that computes gravity and gravity potential for a set of points 
+     * (e.g. satellites) in or above the model surface for a user-defined range of latitudes,
+     * longitudes and radius. 
  
      * @ingroup Postprocessing
      */
     template <int dim>
-    class GravityCalculation : public Interface<dim>, public ::aspect::SimulatorAccess<dim>
+    class GravityPointValues : public Interface<dim>, public ::aspect::SimulatorAccess<dim>
     {
       public:
         /**
-         * Output gravity [m] to file
+         * Specify the creation of output_gravity.txt.
          */
         virtual
         std::pair<std::string,std::string> execute (TableHandler &);
@@ -67,71 +67,58 @@ namespace aspect
 
       private:
         /**
-         * Gravity is calculated on a spherical surface (i.e. map at a satellite height) 
-         * at which points are spaced according to the mapping_spherical_spacing value 
-         * in degree; same value for longitude and latitude.
+         * Gravity may be calculated for a sets of points along the radius (e.g. depth 
+         * profile) between a minimum and maximum radius. Number of points along the radius
+         * is specified with number_points_radius. 
          */
-        double mapping_spherical_spacing;
+        double number_points_radius;
+
+        /**
+         * Gravity may be calculated for a sets of points along the longitude (e.g. satellite
+         * mapping) between a minimum and maximum longitude. Number of points along the
+         * longitude is specified with number_points_longitude. 
+         */
+        double number_points_longitude;
         
         /**
-         * Gravity is calculated for a depth-profile at which points 
-         * are spaced according to the profile_height_spacing value in meter.
+         * Gravity may be calculated for a sets of points along the latitude (e.g. satellite
+         * mapping) between a minimum and maximum latitude. Number of points along the
+         * latitude is specified with number_points_latitude. 
          */
-        double profile_depth_spacing;
+        double number_points_latitude;
 
         /**
-         * Height above the model surface at which the gravity for mapping is calculated.
+         * Minimum radius may be defined in or outside the model.
          */
-        double mapping_satellite_height;
+        double minimum_radius;
         
         /**
-         * Maximum height above the model surface at which the gravity for depth-profile is calculated.
+         * Maximum radius for depth-profile. Can be defined in or outside the model.
+         * No need to specify maximum_radius if number_points_radius is 1;
          */
-        double profile_satellite_height;
+        double maximum_radius;
 
         /**
-         * Longitude at which gravity depth-profile is calculated 
-         */
-        double profile_longitude;
-
-        /**
-         * Latitude at which gravity depth-profile is calculated 
-         */
-        double profile_latitude;
-        /**
-         * Minimum longitude required for regional gravity mapping 
+         * Minimum longitude.
          */
         double minimum_longitude;
 
         /**
-         * Minimum longitude required for regional gravity mapping 
+         * Maximum longitude.  
+         * No need to specify maximum_longitude if number_points_longitude is 1;
          */
         double maximum_longitude;
         
         /**
-         * Minimum longitude required for regional gravity mapping 
+         * Minimum latitude
          */
         double minimum_latitude;
     
         /**
-         * Minimum longitude required for regional gravity mapping 
+         * Maximum latitude 
+         * No need to specify maximum_latitude if number_points_latitude is 1;
          */
         double maximum_latitude;
-
-        /**
-         * The reference density used in the gravity calculation 
-         */
-        double reference_density;
-
-        /**
-         * Enumeration for selecting which type of viscous flow law to use.
-         * Select between mapping or profile.
-         */
-        enum gravity_calculation_type
-        {
-          profile,
-          mapping
-        } gravity_calculation_type;
 
     };
   }

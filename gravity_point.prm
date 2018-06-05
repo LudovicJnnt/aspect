@@ -1,0 +1,149 @@
+# A simple setup for gravity acceleration calculated at a point P
+# manual for more information.
+
+# General parameters
+set Dimension                              = 3
+set End time                               = 0
+set Output directory                       = output_gravity
+#set Pressure normalization                 = surface 
+
+# Solver settings
+#subsection Solver parameters
+#  subsection Stokes solver parameters
+#    set Maximum number of expensive Stokes solver steps = 1000000 
+#  end
+#end
+
+# Model geometry
+subsection Geometry model
+#  set Model name = spherical shell
+#  subsection Spherical shell
+#    set Inner radius  = 1 #3481000
+#    set Outer radius  = 2 #6371000
+#    set Cells along circumference = 12
+#  end
+  #set Model name = chunk
+  #subsection Chunk
+  #  set Chunk minimum longitude = 220
+  #  set Chunk maximum longitude = 270
+  #  set Chunk minimum latitude = 20
+  #  set Chunk maximum latitude = 70
+  #  set Chunk inner radius = 1
+  #  set Chunk outer radius = 2
+  #  #set Longitude repetitions = 4
+  #  #set Latitude repetitions = 10
+  #  #set Radius repetitions = 30
+  #end
+  set Model name = sphere
+    #set Radius = 6371000
+end
+
+# Model boundary velocity
+subsection Boundary velocity model
+  #set Tangential velocity boundary indicators =  north, south, east, west, inner, outer
+  set Zero velocity boundary indicators       = top #, bottom
+end
+
+# Element types
+#subsection Discretization
+#  set Composition polynomial degree     = 2
+#  set Stokes velocity polynomial degree = 1
+#  set Temperature polynomial degree     = 1
+#  set Use locally conservative discretization = true
+#end
+
+# Material model
+subsection Material model
+  set Model name = simple
+  subsection Simple model
+    set Reference density                 = 5500
+    set Viscosity                         = 1e21
+    set Thermal expansion coefficient     = 3e-5
+    set Reference temperature             = 1600
+    set Thermal conductivity              = 4.125 
+    set Reference specific heat           = 1250
+  end
+end
+
+# Model boundary temperature
+subsection Boundary temperature model
+  set List of model names = spherical constant
+   subsection Spherical constant
+    #set Inner temperature = 2000
+    set Outer temperature = 273 #1000
+  end
+end
+
+# Model initial temperature
+subsection Initial temperature model
+  set Model name = function #S40RTS perturbation
+  subsection Function       #S40RTS perturbation
+    set Function expression = 273
+    #set Initial condition file name       = S40RTS.sph
+    #set Spline knots depth file name      = Spline_knots.txt
+    #set Remove degree 0 from perturbation = false
+    #set Vs to density scaling             = 0.15
+    #set Thermal expansion coefficient in initial temperature scaling = 3e-5
+    #set Reference temperature             = 1600
+  end
+end
+
+# Specify number and name of compositional fields
+#subsection Compositional fields
+#  set Number of fields = 2
+#  set Names of fields  = com, den 
+#end
+
+# Composition initial conditions
+#subsection Initial composition model
+#  set Model name = ascii data
+#  subsection Ascii data model
+#    set Data directory       = /home/ludovic/aspect/crust1/aspect_crust1_ascii_input/examples/
+#    set Data file name       = crust1_example_sph_3d.txt
+#  end
+#end
+
+# Model gravity
+subsection Gravity model
+  set Model name = radial constant
+  subsection Radial constant
+    set Magnitude  = 10
+  end
+end
+
+# Mesh refinement
+subsection Mesh refinement
+  set Initial global refinement          = 3
+  #set Initial adaptive refinement        = 0
+  #set Strategy                           = minimum refinement function
+  # theta is the polar angle measured positive from the north pole
+  # Note to allow a larger domain of higher mesh refinement to avoid boundary effects
+  #subsection Minimum refinement function
+  #  set Function constants               = pi = 3.141592 
+  #  set Coordinate system                = spherical
+  #  set Variable names                   = r, phi, theta
+  #  set Function expression              = if(r>5500000 && (theta>20*pi/180) && (theta<70*pi/180) && (phi>40*pi/180) && (phi<90*pi/180), 3 ,2)
+  #end
+end
+
+# Postprocessing
+subsection Postprocess
+  set List of postprocessors = visualization, gravity calculation
+  subsection Visualization
+    set Output format                 = vtu
+    set List of output variables      = density
+    set Time between graphical output = 0
+    set Number of grouped files       = 1
+  end
+  subsection Gravity calculation
+    set Minimum radius                = 6371000
+    #set Maximum radius                = 4 #10000000
+    set Minimum longitude             = 230
+    set Maximum longitude             = 260 
+    set Minimum latitude              = 30
+    set Maximum latitude              = 60
+    #set Number points radius          = 100
+    set Number points longitude       = 6
+    set Number points latitude        = 6
+  end
+end
