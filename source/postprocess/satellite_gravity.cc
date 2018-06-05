@@ -115,15 +115,14 @@ namespace aspect
          << minimum_longitude << ' ' << maximum_longitude << '\n'
          << minimum_latitude << ' ' << maximum_latitude << '\n';
 
-      // Storing density values from MaterialModel in a vector per MPI avoids to 
-      // use MaterialModel to get the density at quadrature points within the loops.
-      // First create density_all array: 
+      // Storing cartesian coordinate, density and JzW at quadrature points in a vector 
+      // avoids to use MaterialModel and fe_values within the loops.
       unsigned int local_cell_number = (this->get_triangulation().n_locally_owned_active_cells());
       const unsigned int number_quadrature_points_mpi = local_cell_number * number_quadrature_points_cell;
-      std::vector<double> density_all (number_quadrature_points_mpi);
-      //std::vector<Point<dim> > position_point_test (number_quadrature_points_mpi);
+      std::vector<double> density_JxW (number_quadrature_points_mpi);
+      std::vector<Point<dim> > position_point (number_quadrature_points_mpi);
 
-      // Second get density from MaterialModel and allocate to density_all array: 
+      // Store density and  from MaterialModel and allocate to density_all array: 
       typename DoFHandler<dim>::active_cell_iterator
       cell = this->get_dof_handler().begin_active(),
       endc = this->get_dof_handler().end();
@@ -135,17 +134,18 @@ namespace aspect
           if (cell->is_locally_owned())
             {
               fe_values.reinit (cell);
+              const std::vector<Point<dim> > &position_point_cell = fe_values.get_quadrature_points();
               in.reinit(fe_values, cell, this->introspection(), this->get_solution(), false);
               this->get_material_model().evaluate(in, out);
               for (unsigned int q = 0; q < number_quadrature_points_cell; ++q)
                 {
-                 density_all[local_cell_number * number_quadrature_points_cell + q] = out.densities[q];
-                 //position_point_test[local_cell_number * number_quadrature_points_cell +q] = fe_values.get_quadrature_points();
+                 density_JxW[local_cell_number * number_quadrature_points_cell + q] = out.densities[q] * fe_values.JxW(q);
+                 position_point[local_cell_number * number_quadrature_points_cell + q] = position_point_cell[q];
+                 
                 }
               ++local_cell_number;
             }
          }
-      //f2 << position_point_test << '\n';
 
       // loop on r - satellite position [r, ,  ]
       for (unsigned int h=0; h < number_points_radius; ++h)
@@ -177,14 +177,13 @@ namespace aspect
                     {
                       if (cell->is_locally_owned())
                         {
-                          fe_values.reinit (cell);                                                            // required if position_point out? because of fe_values.JxW(q)?
-                          const std::vector<Point<dim> > &position_point = fe_values.get_quadrature_points(); // move this outside the loop? same with fe_values.JxW(q)?
+                          //fe_values.reinit (cell);  // required if position_point out? because of fe_values.JxW(q)?
                           for (unsigned int q = 0; q < number_quadrature_points_cell; ++q)
                             {
-                              double dist = (position_satellite - position_point[q]).norm();
-                              double KK = G * density_all[local_cell_number * number_quadrature_points_cell + q] * fe_values.JxW(q) / pow(dist,3);
-                              local_g += KK * (position_satellite - position_point[q]);
-                              local_U -= G * density_all[local_cell_number * number_quadrature_points_cell + q] * fe_values.JxW(q) / dist;
+                              double dist = (position_satellite - position_point[local_cell_number * number_quadrature_points_cell + q]).norm();
+                              double KK = G * density_JxW[local_cell_number * number_quadrature_points_cell + q] / pow(dist,3);
+                              local_g += KK * (position_satellite - position_point[local_cell_number * number_quadrature_points_cell + q]);
+                              local_U -= G * density_JxW[local_cell_number * number_quadrature_points_cell + q] / dist;
                             }
                           ++local_cell_number;
                         }

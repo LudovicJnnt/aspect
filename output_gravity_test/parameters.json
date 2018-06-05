@@ -119,7 +119,7 @@
         "pattern_description": "[Double -MAX_DOUBLE...MAX_DOUBLE (inclusive)]"
     },
     "Output_20directory": {
-        "value": "output_gravity",
+        "value": "output_gravity_test",
         "default_value": "output",
         "documentation": "The name of the directory into which all output files should be placed. This may be an absolute or a relative path.",
         "pattern": "17",
@@ -834,14 +834,14 @@
                 "pattern_description": "[Double 0...MAX_DOUBLE (inclusive)]"
             },
             "Number_20points_20longitude": {
-                "value": "6",
+                "value": "30",
                 "default_value": "1",
                 "documentation": "",
                 "pattern": "107",
                 "pattern_description": "[Double 0...MAX_DOUBLE (inclusive)]"
             },
             "Number_20points_20latitude": {
-                "value": "6",
+                "value": "30",
                 "default_value": "1",
                 "documentation": "",
                 "pattern": "108",
@@ -3969,21 +3969,21 @@
         },
         "Simple_20model": {
             "Reference_20density": {
-                "value": "5500",
+                "value": "5513",
                 "default_value": "3300",
                 "documentation": "Reference density $\\rho_0$. Units: $kg\/m^3$.",
                 "pattern": "551",
                 "pattern_description": "[Double 0...MAX_DOUBLE (inclusive)]"
             },
             "Reference_20temperature": {
-                "value": "1600",
+                "value": "293",
                 "default_value": "293",
                 "documentation": "The reference temperature $T_0$. The reference temperature is used in both the density and viscosity formulas. Units: $K$.",
                 "pattern": "552",
                 "pattern_description": "[Double 0...MAX_DOUBLE (inclusive)]"
             },
             "Viscosity": {
-                "value": "1e21",
+                "value": "5e24",
                 "default_value": "5e24",
                 "documentation": "The value of the constant viscosity $\\eta_0$. This viscosity may be modified by both temperature and compositional dependencies. Units: $kg\/m\/s$.",
                 "pattern": "553",
@@ -4018,7 +4018,7 @@
                 "pattern_description": "[Double 0...MAX_DOUBLE (inclusive)]"
             },
             "Thermal_20conductivity": {
-                "value": "4.125",
+                "value": "4.7",
                 "default_value": "4.7",
                 "documentation": "The value of the thermal conductivity $k$. Units: $W\/m\/K$.",
                 "pattern": "558",
@@ -4032,7 +4032,7 @@
                 "pattern_description": "[Double 0...MAX_DOUBLE (inclusive)]"
             },
             "Thermal_20expansion_20coefficient": {
-                "value": "3e-5",
+                "value": "2e-5",
                 "default_value": "2e-5",
                 "documentation": "The value of the thermal expansion coefficient $\\alpha$. Units: $1\/K$.",
                 "pattern": "560",

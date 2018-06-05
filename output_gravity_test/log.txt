@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------------
 -- This is ASPECT, the Advanced Solver for Problems in Earth's ConvecTion.
---     . version 2.0.0-pre (gravity_postprocessor, 82409d5)
+--     . version 2.0.0-pre (gravity_postprocessor, d27543e)
 --     . using deal.II 8.5.1
 --     . using Trilinos 12.10.1
 --     . using p4est 2.0.0
@@ -18,26 +18,26 @@ Number of degrees of freedom: 121,901 (88,563+3,817+29,521)
    Solving Stokes system... 200+20 iterations.
 
    Postprocessing:
-     Writing graphical output: output_gravity/solution/solution-00000
-     gravity computation file: output_gravity/output_gravity.txt
+     Writing graphical output: output_gravity_test/solution/solution-00000
+     gravity computation file: output_gravity_test/output_gravity.txt
 
 Termination requested by criterion: end time
 
 
 +---------------------------------------------+------------+------------+
-| Total wallclock time elapsed since start    |      36.6s |            |
+| Total wallclock time elapsed since start    |      24.3s |            |
 |                                             |            |            |
 | Section                         | no. calls |  wall time | % of total |
 +---------------------------------+-----------+------------+------------+
-| Assemble Stokes system          |         1 |      5.01s |        14% |
-| Assemble temperature system     |         1 |      2.57s |         7% |
-| Build Stokes preconditioner     |         1 |      2.11s |       5.8% |
-| Build temperature preconditioner|         1 |    0.0647s |      0.18% |
-| Solve Stokes system             |         1 |      11.2s |        31% |
-| Solve temperature system        |         1 |   0.00764s |         0% |
-| Initialization                  |         1 |    0.0343s |         0% |
-| Postprocessing                  |         1 |      13.1s |        36% |
-| Setup dof systems               |         1 |     0.757s |       2.1% |
-| Setup initial conditions        |         1 |     0.174s |      0.47% |
+| Assemble Stokes system          |         1 |      4.73s |        19% |
+| Assemble temperature system     |         1 |      2.25s |       9.3% |
+| Build Stokes preconditioner     |         1 |      1.91s |       7.9% |
+| Build temperature preconditioner|         1 |    0.0582s |      0.24% |
+| Solve Stokes system             |         1 |      9.81s |        40% |
+| Solve temperature system        |         1 |   0.00692s |         0% |
+| Initialization                  |         1 |    0.0338s |      0.14% |
+| Postprocessing                  |         1 |      3.18s |        13% |
+| Setup dof systems               |         1 |     0.655s |       2.7% |
+| Setup initial conditions        |         1 |     0.151s |      0.62% |
 +---------------------------------+-----------+------------+------------+
 

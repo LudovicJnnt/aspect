@@ -123,7 +123,7 @@ set Nonlinear solver tolerance                 = 1e-5
 
 # The name of the directory into which all output files should be placed. This
 # may be an absolute or a relative path.
-set Output directory                           = output_gravity                  # default: output
+set Output directory                           = output_gravity_test             # default: output
 
 # If and how to normalize the pressure after the solution step. This is
 # necessary because depending on boundary conditions, in many cases the
@@ -5458,20 +5458,20 @@ subsection Material model
     set Minimum thermal prefactor                      = 1.0e-2
 
     # Reference density $\rho_0$. Units: $kg/m^3$.
-    set Reference density                              = 5500   # default: 3300
+    set Reference density                              = 5513   # default: 3300
 
     # The value of the specific heat $C_p$. Units: $J/kg/K$.
     set Reference specific heat                        = 1250
 
     # The reference temperature $T_0$. The reference temperature is used in
     # both the density and viscosity formulas. Units: $K$.
-    set Reference temperature                          = 1600   # default: 293
+    set Reference temperature                          = 293
 
     # The value of the thermal conductivity $k$. Units: $W/m/K$.
-    set Thermal conductivity                           = 4.125  # default: 4.7
+    set Thermal conductivity                           = 4.7
 
     # The value of the thermal expansion coefficient $\alpha$. Units: $1/K$.
-    set Thermal expansion coefficient                  = 3e-5   # default: 2e-5
+    set Thermal expansion coefficient                  = 2e-5
 
     # The temperature dependence of viscosity. Dimensionless exponent. See the
     # general documentation of this model for a formula that states the
@@ -5482,7 +5482,7 @@ subsection Material model
     # The value of the constant viscosity $\eta_0$. This viscosity may be
     # modified by both temperature and compositional dependencies. Units:
     # $kg/m/s$.
-    set Viscosity                                      = 1e21   # default: 5e24
+    set Viscosity                                      = 5e24
   end
 
   subsection Simpler model
@@ -6739,8 +6739,8 @@ subsection Postprocess
     set Minimum latitude        = 30      # default: 0
     set Minimum longitude       = 230     # default: 0
     set Minimum radius          = 6371000 # default: 0
-    set Number points latitude  = 6       # default: 1
-    set Number points longitude = 6       # default: 1
+    set Number points latitude  = 30      # default: 1
+    set Number points longitude = 30      # default: 1
     set Number points radius    = 1
   end
 
