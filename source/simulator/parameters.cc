@@ -482,6 +482,10 @@ namespace aspect
                          "of the Stokes equation. This feature is likely only used when implementing force "
                          "vectors for manufactured solution problems and requires filling additional outputs "
                          "of type AdditionalMaterialOutputsStokesRHS.");
+      prm.declare_entry ("Enable elasticity", "false",
+                         Patterns::Bool (),
+                         "Whether to include the additional elastic terms on the right-hand side of "
+                         "the Stokes equation.");
     }
     prm.leave_subsection();
 
@@ -638,6 +642,11 @@ namespace aspect
                          "Whether or not the postprocessors should be executed after "
                          "each of the initial adaptive refinement cycles that are run at "
                          "the start of the simulation.");
+      prm.declare_entry ("Solvers off during initial refinement", "false",
+                         Patterns::Bool (),
+                         "Whether or not solvers should be executed after the initial "
+                         "adaptive refinement cycles that are run at the start of the "
+                         "simulation.");
     }
     prm.leave_subsection();
 
@@ -1163,6 +1172,7 @@ namespace aspect
       else AssertThrow(false, ExcNotImplemented());
 
       enable_additional_stokes_rhs = prm.get_bool ("Enable additional Stokes RHS");
+      enable_elasticity = prm.get_bool("Enable elasticity");
     }
     prm.leave_subsection ();
 

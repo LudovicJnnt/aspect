@@ -95,6 +95,11 @@ namespace aspect
     template <int dim> class Interface;
   }
 
+  namespace MeshRefinement
+  {
+    template <int dim> class Manager;
+  }
+
   namespace AdiabaticConditions
   {
     template <int dim> class Interface;
@@ -425,6 +430,16 @@ namespace aspect
       get_old_old_solution () const;
 
       /**
+       * Return a reference to the vector that has the reactions computed by the
+       * operator splitting scheme in the current time step.
+       *
+       * @note In general the vector is a distributed vector; however, it
+       * contains ghost elements for all locally relevant degrees of freedom.
+       */
+      const LinearAlgebra::BlockVector &
+      get_reaction_vector () const;
+
+      /**
        * Return a reference to the vector that has the mesh velocity for
        * simulations with a free surface.
        *
@@ -659,6 +674,15 @@ namespace aspect
        */
       const HeatingModel::Manager<dim> &
       get_heating_model_manager () const;
+
+      /**
+       * Return a reference to the manager of the mesh refinement strategies.
+       * this can then i.e. be used to get the names of the active refinement
+       * strategies for such purposes as confirming that a particular one has
+       * been included.
+       */
+      const MeshRefinement::Manager<dim> &
+      get_mesh_refinement_manager () const;
 
       /**
        * Return a reference to the melt handler.
