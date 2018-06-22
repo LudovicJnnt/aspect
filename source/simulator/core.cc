@@ -282,6 +282,7 @@ namespace aspect
         AssertThrow(prescribed_stokes_solution.get()!=NULL,
                     ExcMessage("For the 'single Advection, no Stokes' solver scheme you need to provide a Stokes plugin!")
                    );
+        //test test test
       }
     else
       {
