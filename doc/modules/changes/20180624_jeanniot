@@ -1,0 +1,5 @@
+New: There is now the possibility to turn off solvers and/or initial 
+conditions setup during the initial refinement phase. Both switchs are 
+defined in the subsection mesh refinement. 
+<br>
+(Ludovic Jeanniot, 2018/06/24)
