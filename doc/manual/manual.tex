@@ -6754,7 +6754,7 @@ The boundary conditions are insulating (zero flux) side-walls and fixed temperat
 
 The structure and refinement of the mesh are determined in two subsections of the parameter file. First, because the model domain is not a square, it is necessary to subdivide the domain into sections that are equidimensional (or as close as possible): this is done using the \texttt{repetitions} parameters in the \texttt{Geometry} section. In this case because the model domain has an aspect ratio of 5:1, we use 5 repetitions in the x direction, dividing the domain into 5 equidimensional elements each 1000 by 1000 km.
 \lstinputlisting[language=prmfile]{cookbooks/muparser-temperature-example/repetitions.part.prm}
-Further refinements will divide each sub-region multiple times keeping the aspect ratio of the sub-region. In this case, we refine the elements in each subregion 3 more times. We then use the \texttt{minimum refinement function} strategy and use the function expression to refine 4 more times to a refinement level of 7, but only where the depth is less than 150 km.
+Further refinements will divide each sub-region multiple times keeping the aspect ratio of the sub-region. In this case, we refine the elements in each subregion 3 more times. We then use the \texttt{minimum refinement function} strategy and use the if-then-else statement in the function expression to refine 4 more times to a refinement level of 7, but only where the depth is less than 150 km. Appropriate values of the minimum refinement level in this function expression could be the sum of initial global refinement level (3) and initial adaptive refinement level (4) in the 'then' statement (i.e., 7 here) and the value of initial global refinement in the 'else' statement.
 \lstinputlisting[language=prmfile]{cookbooks/muparser-temperature-example/mesh-refinement.part.prm}
 Figure \ref{lazy-expression-tempic-zoom} zooms in on the region where the two plates meet and shows the temperature on a wireframe highlighting the element size refinement. Notice that the mesh refinement algorithm automatically adjusts the element size between the region that is specific to be a level 7 and the region at level 3 to create a smooth transition in element size.
 \begin{figure}
@@ -8570,8 +8570,20 @@ compared with, while for others, there are only sets of numbers that are
 approximately known. We have implemented a number of them in \aspect{} to
 convince ourselves (and our users) that \aspect{} indeed works as intended and
 advertised. Some of these benchmarks are discussed below. Numerical results
-for several of these benchmarks are also presented in \cite{KHB12} in much more
+for several of these benchmarks are also presented in a number of
+papers (such as \cite{KHB12,heister_aspect_methods2,T15,FBTGS18}) in much more
 detail than shown here.
+
+Before going on with showing these benchmarks, let us mention that the
+data shown below (and in the papers mentioned above) reflect the state
+of \aspect{} at a particular time. On the other hand, \aspect{} has
+become more accurate and faster over time, for example by implementing
+better stabilization schemes for the advection equations and improving
+assembly and solver times. We occasionally update sections of the
+manual, but when reading through the sections on individual benchmarks
+below, it is worthwhile keeping in mind that \aspect{} may yield
+different (and often better) results than the one shown.
+
 
 \subsubsection{Running benchmarks that require code}
 \label{sec:benchmark-run}
@@ -9056,8 +9068,8 @@ element chosen, etc.; we have done so extensively in \cite{KHB12}.
 
 The SolKz benchmark is another variation on the same theme as the SolCx
 benchmark above: it solves a Stokes problem with a spatially variable
-viscosity but this time the viscosity is not a discontinuous function but
-grows exponentially with the vertical coordinate so that it's overall
+viscosity, but this time the viscosity is not a discontinuous function. Instead,
+it grows exponentially with the vertical coordinate so that its overall
 variation is again $10^6$. The forcing is again chosen by imposing a spatially
 variable density variation. For details, refer again to \cite{DMGT11}.
 
@@ -9068,7 +9080,9 @@ section, solves the benchmark (see \url{benchmarks/solkz/}):
 
 The output when running \aspect{} on this parameter file looks similar to the
 one shown for the SolCx case. The solution when computed with one more level
-of global refinement is visualized in Fig.~\ref{fig:solkz}.
+of global refinement is visualized in Fig.~\ref{fig:solkz}. The velocity solution
+computed with three more levels of global refinement and plotted over the viscosity
+field is shown in Fig.~\ref{fig:solkz2}.
 
 \begin{figure}
   \begin{center}
@@ -9076,11 +9090,18 @@ of global refinement is visualized in Fig.~\ref{fig:solkz}.
     \hfill
     \includegraphics[width=0.45\textwidth]{cookbooks/benchmarks/solkz-solution-pressure.png}
     \caption{\it SolKz Stokes benchmark. Left: The density perturbation field
-    and overlaid to it some velocity vectors. The viscosity grows exponentially
+    overlaid with velocity vectors. The viscosity grows exponentially
       in the vertical direction, leading to small velocities at the top
-      despite the large density variations. Right: The
-      pressure.}
+      despite the large density variations. Right: The pressure.}
     \label{fig:solkz}
+  \end{center}
+\end{figure}
+
+\begin{figure}
+  \begin{center}
+    \includegraphics[width=0.7\textwidth]{cookbooks/benchmarks/solkz-solution-viscosity.png}
+    \caption{\it SolKz Stokes benchmark. Another view of the velocity vectors, this time plotted over the viscosity field.}
+    \label{fig:solkz2}
   \end{center}
 \end{figure}
 
@@ -12729,7 +12750,7 @@ test and rename it to the name of your parameter file.
 
 To actually run the test, you have to go to your \aspect{} build directory and run 
 \begin{lstlisting}[frame=single,language=ksh] 
-    cmake .
+    make setup\_tests
 \end{lstlisting}
 so that your new test is added to the test suite. Then you can run it by executing 
 \begin{lstlisting}[frame=single,language=ksh] 
