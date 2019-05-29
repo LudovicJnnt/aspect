@@ -112,7 +112,13 @@ namespace aspect
                         << std::endl;
               if (GridTools::cell_measure (points, this_cell.vertices) < 0)
               {
-                  std::swap (this_cell.vertices[1], this_cell.vertices[2]);
+                  if (dim == 2)
+                      std::swap (this_cell.vertices[1], this_cell.vertices[2]);
+                  if (dim == 3)
+                  {
+                      std::swap (this_cell.vertices[1], this_cell.vertices[2]);
+                      std::swap (this_cell.vertices[5], this_cell.vertices[6]);
+                  }
                   std::cout << "xxx cell=" << cells.size()
                             << " new value: " << GridTools::cell_measure (points, this_cell.vertices)
                             << std::endl;
@@ -163,10 +169,6 @@ namespace aspect
         }
 
       // Then create the actual mesh:
-#if !DEAL_II_VERSION_GTE(9,1,0)
-      //GridReordering<dim>::invert_all_cells_of_negative_grid (points, cells);
-      //GridReordering<dim>::reorder_cells (cells, true);
-#endif
       coarse_grid.create_triangulation(points, cells, subcell_data);
 
       // Use a manifold description for all cells.

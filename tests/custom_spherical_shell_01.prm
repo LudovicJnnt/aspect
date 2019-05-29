@@ -1,7 +1,7 @@
 # like refine_vel.prm, but run the "spherical velocity statistics"
 # postprocessor
 
-set Dimension = 2
+set Dimension = 3
 set CFL number                             = 1.0
 set End time                               = 0
 set Start time                             = 0
@@ -42,7 +42,7 @@ subsection Geometry model
   subsection Custom spherical shell
     set Inner radius = 6071000
     set Outer radius = 6371000
-    set Number of slices = 3
+    set Number of slices = 2
   end
 end
 
