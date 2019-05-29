@@ -252,9 +252,6 @@ namespace aspect
     }
 
 
-
-
-
     template <int dim>
     std::set<types::boundary_id>
     SphericalShell<dim>::
@@ -566,6 +563,7 @@ namespace aspect
           phi = prm.get_double ("Opening angle");
           n_cells_along_circumference = prm.get_integer ("Cells along circumference");
           R_values_list = Utilities::string_to_double(Utilities::split_string_list(prm.get("List of radial values")));
+          initial_lateral_refinement = prm.get_integer ("Initial lateral refinement");
           n_slices = prm.get_integer ("Number of slices");
 
           if (prm.get ("Custom mesh subdivision") == "none")
@@ -577,6 +575,7 @@ namespace aspect
           else
             AssertThrow (false, ExcMessage ("Not a valid custom mesh subdivision scheme."));
 
+          // Check that inner radius is less than outer radius
           AssertThrow (R0 < R1,
                        ExcMessage ("Inner radius must be less than outer radius."));
 

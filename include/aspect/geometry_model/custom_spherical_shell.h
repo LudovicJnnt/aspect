@@ -44,13 +44,13 @@ namespace aspect
      * angle of the section of the shell we want to build.
      */
     template <int dim>
-    class SphericalShell : public Interface<dim>, public SimulatorAccess<dim>
+    class CustomSphericalShell : public Interface<dim>, public SimulatorAccess<dim>
     {
       public:
         /**
          * Constructor.
          */
-        SphericalShell();
+        CustomSphericalShell();
 
         /**
          * Generate a coarse mesh for the geometry described by this class.
@@ -178,75 +178,16 @@ namespace aspect
         double
         outer_radius () const;
 
-        /**
-         * Return the opening angle of the shell sector.
-         */
-        double
-        opening_angle () const;
-
       private:
-
-        /**
-         * Specify the radial subdivision of the spherical shell
-         * mesh.
-         */
-        enum CustomMeshRadialSubdivision
-        {
-          none,
-          list,
-          slices
-        } custom_mesh;
-
-        /**
-         * Initial surface refinement for the custom mesh cases.
-         */
-        int initial_lateral_refinement;
-
-        /**
-         * Initial surface refinement for the custom mesh cases.
-         */
-        unsigned int n_slices;
-
-        /**
-         * List of radius for the list custom mesh.
-         */
-        std::vector<double> R_values_list;
-
-        /**
-         * Specify the radial subdivision of the spherical shell  
-         * mesh.
-         */
-        enum CustomMeshRadialSubdivision
-        {
-          none,
-          list,
-          slices
-        } custom_mesh;
-
-        /**
-         * Initial surface refinement for the custom mesh cases.
-         */
-        int initial_lateral_refinement;
-
-        /**
-         * Initial surface refinement for the custom mesh cases.
-         */
-        unsigned int n_slices;
-
-        /**
-         * List of radius for the list custom mesh.
-         */
-        std::vector<double> R_values_list;
-
         /**
          * Inner and outer radii of the spherical shell.
          */
         double R0, R1;
 
         /**
-         * Opening angle of the section of the shell that we simulate.
+         * Number of slices for extrusion in case of tailored spherical shell.
          */
-        double phi;
+        unsigned int n_slices;
 
         /**
          * Number of tangential mesh cells in the initial, coarse mesh.
@@ -263,7 +204,6 @@ namespace aspect
          * refinement to generate well shaped cells.
          */
         void set_manifold_ids (parallel::distributed::Triangulation<dim> &triangulation) const;
-
     };
   }
 }
