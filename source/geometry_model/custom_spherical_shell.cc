@@ -33,6 +33,8 @@
 #include <aspect/geometry_model/initial_topography_model/zero_topography.h>
 
 #include <deal.II/grid/grid_generator.h>
+#include <deal.II/grid/grid_reordering.h>
+#include <deal.II/grid/grid_tools.h>
 #include <aspect/utilities.h>
 
 namespace aspect
@@ -98,7 +100,26 @@ namespace aspect
 
               this_cell.material_id = cell->material_id();
 
+#if !DEAL_II_VERSION_GTE(9,1,0)
+              // In deal.II prior to version 9.1, the hyper_ball mesh generated above
+              // had cells that were inconsistently oriented: Some cells had a normal
+              // vector that pointed to the inside of the ball, some that pointed
+              // to the outside. This leads to cells with either negative or
+              // positive volume if we extrude them in the radial direction. We need
+              // to fix this up.
+              std::cout << "xxx cell=" << cells.size()
+                        << " " << GridTools::cell_measure (points, this_cell.vertices)
+                        << std::endl;
+              if (GridTools::cell_measure (points, this_cell.vertices) < 0)
+              {
+                  std::swap (this_cell.vertices[1], this_cell.vertices[2]);
+                  std::cout << "xxx cell=" << cells.size()
+                            << " new value: " << GridTools::cell_measure (points, this_cell.vertices)
+                            << std::endl;
+              }
+#endif
               cells.push_back(this_cell);
+
 
 
               // Mark the bottom face of the cell as boundary 0 if we are in
@@ -142,6 +163,10 @@ namespace aspect
         }
 
       // Then create the actual mesh:
+#if !DEAL_II_VERSION_GTE(9,1,0)
+      //GridReordering<dim>::invert_all_cells_of_negative_grid (points, cells);
+      //GridReordering<dim>::reorder_cells (cells, true);
+#endif
       coarse_grid.create_triangulation(points, cells, subcell_data);
 
       // Use a manifold description for all cells.
