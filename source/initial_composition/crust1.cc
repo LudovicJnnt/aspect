@@ -59,11 +59,13 @@ namespace aspect
           
           // Get coordinates (surface elevation, longitude (0-360), latitude (-90 - 90))
           std::array<double,dim> wcoord = Utilities::Coordinates::WGS84_coordinates(position);
-                 
-          const double depth  = wcoord[0] - position.norm(); // positive value        
-          
-          if (depth >= 0.)
-            return 3300.;
+                
+          // Define location of current point
+          const double depth  = wcoord[0] - position.norm(); // positive value 
+          const double lon    = wcoord[1];       
+          const double lat    = wcoord[2];
+
+          return 3300.;
         }
       return 0.0;
     }
@@ -161,9 +163,8 @@ namespace aspect
               crust1_lon_lat[count][0] = lon_min_cr1 + double(j);
               crust1_lon_lat[count][1] = lat_min_cr1 + double(i);
               count = count + 1;
-            }
+             }
         }
-
     }
   }
 }
