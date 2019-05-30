@@ -78,6 +78,8 @@ namespace aspect
 
         std::array<std::array<double, 9>, 64800> bnds;
         std::array<std::array<double, 9>, 64800> rho;
+
+        std::array<std::array<double, 2>, 64800> crust1_lon_lat;
         
     };
   }

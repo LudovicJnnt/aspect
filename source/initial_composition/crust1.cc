@@ -56,8 +56,11 @@ namespace aspect
       const unsigned int crust1_index = this->introspection().compositional_index_for_name("crust1_density");
       if (compositional_index == crust1_index)
         {
-
-          const double depth = this->get_geometry_model().depth(position);
+          
+          // Get coordinates (surface elevation, longitude (0-360), latitude (-90 - 90))
+          std::array<double,dim> wcoord = Utilities::Coordinates::WGS84_coordinates(position);
+                 
+          const double depth  = wcoord[0] - position.norm(); // positive value        
           
           if (depth >= 0.)
             return 3300.;
@@ -116,7 +119,7 @@ namespace aspect
 
       const std::string bnds_filename = data_directory+crust1_bnds_file_name;
 
-      // Read data from
+      // Read data from file
       std::istringstream inbnds(Utilities::read_and_distribute_file_content(bnds_filename, this->get_mpi_communicator()));
 
       std::string bnds_line;
@@ -130,7 +133,7 @@ namespace aspect
 
       const std::string rho_filename = data_directory+crust1_rho_file_name;
       
-      // Read data from
+      // Read data from file
       std::istringstream inrho(Utilities::read_and_distribute_file_content(rho_filename, this->get_mpi_communicator()));
       
       std::string rho_line;
@@ -141,6 +144,26 @@ namespace aspect
           for (unsigned int j=0; j<num_layers; ++j)
             issrho >> rho[i][j]; 
         }
+
+      // Fill variable with lat-lon coordinates for crust 1.0 (make sure lon is 0-360). 
+      // Will need to declare variable in .h file
+      unsigned int count = 0;
+      const unsigned int lon_pts_cr1 = 360;
+      const unsigned int lat_pts_cr1 = 180;
+      const double lon_min_cr1 = -179.5;
+      const double lon_max_cr1 =  179.5;
+      const double lat_min_cr1 = -89.5;
+      const double lat_max_cr1 =  89.5;
+      for (unsigned int i=0; i<lat_pts_cr1; ++i)
+        {
+          for (unsigned int j=0; j<lon_pts_cr1; ++j)
+            {
+              crust1_lon_lat[count][0] = lon_min_cr1 + double(j);
+              crust1_lon_lat[count][1] = lat_min_cr1 + double(i);
+              count = count + 1;
+            }
+        }
+
     }
   }
 }
