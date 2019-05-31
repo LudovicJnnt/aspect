@@ -49,8 +49,6 @@ namespace aspect
 
           const std::vector<double> volume_fractions = MaterialUtilities::compute_volume_fractions(composition, composition_mask);
 
-          //out.densities[i] = reference_rho;
-
           unsigned int indx_crust1_density = this->introspection().compositional_index_for_name("crust1_density");
 
           out.densities[i] = composition[indx_crust1_density];
@@ -167,8 +165,6 @@ namespace aspect
     void
     Crust1<dim>::parse_parameters (ParameterHandler &prm)
     {
-      //not pretty, but we need to get the number of compositional fields before
-      //simulatoraccess has been initialized here...
       unsigned int n_foreground_fields;
       prm.enter_subsection ("Compositional fields");
       {
@@ -229,14 +225,11 @@ namespace aspect
   {
     ASPECT_REGISTER_MATERIAL_MODEL(Crust1,
                                    "crust1",
-                                   "This model is desgined specifically to be used when CRUST1.0 defines"
-                                   " the compositional initial conditions.  Currently, the model only uses"
-                                   " one compositional field where the value at each point represents a"
-                                   " specific rock type in the CRUST1.0 model.  The user should specify 10"
-                                   " density values in the input file, which represent air, water, ice,"  
-                                   " sed layer 1, sed layer 2, sed layer 3, upper crust, middle crust,"
-                                   " lower crust and mantle.  At some point soon, density will be determined"
-                                   " from a separate compositional field that contains the CRUST1.0 densities" 
-                                   " read in from a file.")
+                                   "This material model is a work in progress and is desgined "
+                                   "specifically to be used when the Crust1 initial composition "
+                                   "plugin is used to assign density values from CRUST1.0 to a "
+                                   "compositional field. The densities assigned in this material "
+                                   "model are taken directly from this compositional field. "
+                                   " the compositional initial conditions. ")
   }
 }
