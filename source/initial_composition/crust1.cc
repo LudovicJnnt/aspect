@@ -61,11 +61,56 @@ namespace aspect
           std::array<double,dim> wcoord = Utilities::Coordinates::WGS84_coordinates(position);
                 
           // Define location of current point
-          const double depth  = wcoord[0] - position.norm(); // positive value 
+          //const double depth  = wcoord[0] - position.norm(); // positive value 
           const double lon    = wcoord[1];       
           const double lat    = wcoord[2];
+          const double colat  = 90. - lat;
 
-          return 3300.;
+          const double depth = (position.norm() - 6371000.)/1000.;
+
+          int ilat = std::min(int(colat),179);
+          int ilon = std::min(int(lon),359);
+
+          int cr1_index = (ilat+1)*360 + ilon;
+          double cr1_rho = 0.;
+          if (depth < bnds[cr1_index][8])
+            {
+              cr1_rho = 3300.;
+            }
+          else if (depth < bnds[cr1_index][7])
+            {
+              cr1_rho = rho[cr1_index][7]; 
+            }
+          else if (depth < bnds[cr1_index][6])
+            {
+              cr1_rho = rho[cr1_index][6];
+            } 
+          else if (depth < bnds[cr1_index][5])
+            {
+              cr1_rho = rho[cr1_index][5];
+            }
+          else if (depth < bnds[cr1_index][4])
+            {
+              cr1_rho = rho[cr1_index][4];
+            }
+          else if (depth < bnds[cr1_index][3])
+            {
+              cr1_rho = rho[cr1_index][3];
+            }
+          else if (depth < bnds[cr1_index][2])
+            {
+              cr1_rho = rho[cr1_index][2];
+            }
+          else if (depth < bnds[cr1_index][1])
+            {
+              cr1_rho = rho[cr1_index][1];
+            }
+          else 
+            {
+              cr1_rho = 0;
+            }
+
+          return cr1_rho;
         }
       return 0.0;
     }
