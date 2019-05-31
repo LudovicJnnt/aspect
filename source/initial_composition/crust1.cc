@@ -71,11 +71,13 @@ namespace aspect
           int ilat = std::min(int(colat),179);
           int ilon = std::min(int(lon),359);
 
+
+
           int cr1_index = (ilat+1)*360 + ilon;
           double cr1_rho = 0.;
           if (depth < bnds[cr1_index][8])
             {
-              cr1_rho = 3300.;
+              cr1_rho = 3.3;
             }
           else if (depth < bnds[cr1_index][7])
             {
@@ -109,8 +111,8 @@ namespace aspect
             {
               cr1_rho = 0;
             }
-
-          return cr1_rho;
+           //std::cout << depth << ", " << bnds[cr1_index][8] << "," << cr1_rho*1000. << std::endl;
+           return cr1_rho*1000.;
         }
       return 0.0;
     }
