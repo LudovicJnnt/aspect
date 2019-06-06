@@ -58,12 +58,13 @@ namespace aspect
         {
           
           // Get coordinates (surface elevation, longitude (0-360), latitude (-90 - 90))
-          std::array<double,dim> wcoord = Utilities::Coordinates::WGS84_coordinates(position);
+          //std::array<double,dim> wcoord = Utilities::Coordinates::WGS84_coordinates(position);
+          const std::array<double,dim> scoord = Utilities::Coordinates::cartesian_to_spherical_coordinates(position);
                 
           // Define location of current point
           //const double depth  = wcoord[0] - position.norm(); // positive value 
-          const double lon    = wcoord[1];       
-          const double lat    = wcoord[2];
+          const double lon    = scoord[1];       
+          const double lat    = scoord[2];
           const double colat  = 90. - lat;
 
           const double depth = (position.norm() - 6371000.)/1000.;
