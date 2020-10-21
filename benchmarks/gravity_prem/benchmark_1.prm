@@ -1,0 +1,66 @@
+# This prm file is for the branchmark gravity_prem only:
+# it describes the model setup to calculate gravity of a
+# sphere filled with PREM densities. 
+
+# Define the number of space dimensions we would like to work in
+set Dimension                              = 3 
+
+# The model is instantaneous so that no stokes or advection  
+# is required. 
+set End time                               = 0
+set Use years in output instead of seconds = true
+set Output directory = output
+set Nonlinear solver scheme = no Advection, no Stokes 
+
+# Here we specify the geometry of the domain, which is 
+# a sphere with a radius of 6371km
+subsection Geometry model
+  set Model name = spherical shell
+  subsection Spherical shell
+    set Inner radius  = 3481000
+    set Outer radius  = 6371000
+    set Cells along circumference = 12 
+  end
+end
+
+# Here, we choose a zero average pressure at the surface 
+# of the domain 
+set Pressure normalization                 = surface
+set Surface pressure                       = 0
+
+# Element types: we can decrease the temperature polynomial 
+# degree to 1 because temperature is not taken into account. 
+# NOTE that the gravity postrpocessor uses the Stokes velocity
+# polynomial degree as the base for the number of quadrature
+# points on which the density evaluation is performed. 
+subsection Discretization
+  set Composition polynomial degree     = 2
+  set Stokes velocity polynomial degree = 2
+  set Temperature polynomial degree     = 1
+  set Use locally conservative discretization = true
+end
+
+# A gravity model always have to be specified. This does not
+# affect the gravity calculaton.
+subsection Gravity model
+  set Model name = radial constant
+  subsection Radial constant
+    set Magnitude = 10
+  end
+end
+
+# Call the premDensity material model pluggin written specifically
+# for this benchmark.
+subsection Material model
+  set Model name = simple
+    subsection Simple model
+    set Reference density                 = 3000
+    set Viscosity                         = 0
+    set Reference temperature             = 0
+    set Thermal expansion coefficient     = 0
+
+  end
+end
+
+
+

@@ -1,0 +1,87 @@
+#!/bin/bash
+
+rm inputfile.prm
+rm *.ascii
+rm -r output
+rm opla_*
+rm gravity_res*
+rm statistics_res*
+
+for GMR in 1 2 3 4 ; do
+    for nqextra in 0 1 2 3 4 5 6 7 ; do
+
+        cp benchmark_1.prm inputfile.prm 
+
+        echo ===========================================================
+        echo GMR=$GMR nqextra=$nqextra
+
+        echo set Output directory = output >> inputfile.prm
+
+        echo subsection Mesh refinement >> inputfile.prm
+        echo set Initial global refinement            = ${GMR} >> inputfile.prm
+        echo set Initial adaptive refinement          = 0 >> inputfile.prm
+        echo set Skip solvers on initial refinement   = true >> inputfile.prm
+        echo set Skip setup initial conditions on initial refinement = true >> inputfile.prm
+        echo end >> inputfile.prm
+
+        #echo subsection Compositional fields >> inputfile.prm
+        #echo set Number of fields = 1 >> inputfile.prm
+        #echo end >> inputfile.prm
+        #echo subsection Initial composition model >> inputfile.prm
+        #echo set Model name = ascii data >> inputfile.prm
+        #echo subsection Ascii data model >> inputfile.prm
+        #echo set Data file name = prem-167layers.txt >> inputfile.prm
+        #echo set Data directory = /quanta1/home/jeanniot/aspect/data/initial-composition/ascii-data/ >> inputfile.prm
+        #echo set Interpolation scheme = piecewise constant >> inputfile.prm
+        #echo end >> inputfile.prm
+        #echo end >> inputfile.prm
+
+        echo subsection Postprocess >> inputfile.prm
+        echo set List of postprocessors = basic statistics, material statistics, gravity calculation >> inputfile.prm
+        echo subsection Gravity calculation >> inputfile.prm
+        echo set Quadrature degree increase  = ${nqextra} >> inputfile.prm
+        echo set Reference density           = 3000 >> inputfile.prm
+
+        # profile parameters
+        echo set Sampling scheme             = map >> inputfile.prm
+        echo set Minimum radius              = 0   >> inputfile.prm
+        echo set Maximum radius              = 15000000 >> inputfile.prm
+        echo set Number points radius        = 151 >> inputfile.prm
+        echo set Minimum longitude           = 115 >> inputfile.prm
+        echo set Maximum longitude           = 115 >> inputfile.prm
+        echo set Number points longitude     = 1   >> inputfile.prm
+        echo set Minimum latitude            = 87  >> inputfile.prm
+        echo set Maximum latitude            = 87  >> inputfile.prm
+        echo set Number points latitude      = 1   >> inputfile.prm
+        #echo set List of longitude           = 0 >> inputfile.prm
+        #echo set List of latitude            = 0 >> inputfile.prm
+
+        # map parameters
+        #echo set Sampling scheme                  = map >> inputfile.prm
+        #echo set Number points fibonacci spiral   = 100 >> inputfile.prm
+        #echo set Minimum radius              = 6596000 >> inputfile.prm
+        #echo set Number points longitude     = 10 >> inputfile.prm
+        #echo set Number points latitude      = 10 >> inputfile.prm
+        #echo set Random addition to map coordinates = true >> inputfile.prm 
+
+        echo end >> inputfile.prm
+        echo end >> inputfile.prm
+
+        ./aspect inputfile.prm >> opla__${GMR}_${nqextra}
+
+        # rename files
+        mv output/output_gravity/gravity-00000     gravity_${GMR}_${nqextra}.ascii
+        mv output/statistics                       statistics_${GMR}_${nqextra}.ascii
+
+        rm inputfile.prm
+
+    done 
+done 
+
+cat gravity_*.ascii > gravity_results
+sed -i '/^#/d' B1_gravity_results
+sed -i '/^$/d' B1_gravity_results
+
+cat statistics_*.ascii > statistics_results
+sed -i '/^#/d' B1_statistics_results
+sed -i '/^$/d' B1_statistics_results

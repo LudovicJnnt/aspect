@@ -1,0 +1,97 @@
+#!/bin/bash
+
+rm inputfile.prm
+rm *.ascii
+rm -r output
+rm opla_*
+rm gravity_res*
+rm statistics_res*
+
+for GMR in 3 ; do
+    for nqextra in 3 ; do
+
+        cp benchmark_1.prm inputfile.prm 
+
+        echo ===========================================================
+        echo GMR=$GMR nqextra=$nqextra
+
+        echo set Output directory = output >> inputfile.prm
+
+        echo subsection Mesh refinement >> inputfile.prm
+        echo set Initial global refinement            = ${GMR} >> inputfile.prm
+        echo set Initial adaptive refinement          = 0 >> inputfile.prm
+        echo set Skip solvers on initial refinement   = true >> inputfile.prm
+        echo set Skip setup initial conditions on initial refinement = true >> inputfile.prm
+        echo end >> inputfile.prm
+
+        echo subsection Postprocess >> inputfile.prm
+        echo set List of postprocessors = basic statistics, material statistics, gravity calculation >> inputfile.prm
+        echo subsection Gravity calculation >> inputfile.prm
+        echo set Quadrature degree increase  = ${nqextra} >> inputfile.prm
+        echo set Reference density           = 3000 >> inputfile.prm
+
+        # Parameters profile
+        #echo set Reference density           = 3000 >> inputfile.prm
+        #echo set Precision in gravity output = 16 >> inputfile.prm
+        #echo set Sampling scheme             = map >> inputfile.prm
+        #echo set Minimum radius              = 0   >> inputfile.prm
+        #echo set Maximum radius              = 15000000 >> inputfile.prm
+        #echo set Number points radius        = 151 >> inputfile.prm
+        #echo set Minimum longitude           = 115 >> inputfile.prm
+        #echo set Maximum longitude           = 115 >> inputfile.prm
+        #echo set Number points longitude     = 1   >> inputfile.prm
+        #echo set Minimum latitude            = 87  >> inputfile.prm
+        #echo set Maximum latitude            = 87  >> inputfile.prm
+        #echo set Number points latitude      = 1   >> inputfile.prm
+
+        # Parameters map
+        echo set Reference density           = 3000 >> inputfile.prm
+        echo set Precision in gravity output = 16 >> inputfile.prm
+        echo set Sampling scheme             = map >> inputfile.prm
+        echo set Minimum radius              = 6596000   >> inputfile.prm
+        echo set Number points radius        = 1 >> inputfile.prm
+        echo set Number points longitude     = 73   >> inputfile.prm
+        echo set Number points latitude      = 37   >> inputfile.prm
+        
+        # Parameters cities
+        #echo set Reference density           = 3000 >> inputfile.prm
+        #echo set Precision in gravity output = 16 >> inputfile.prm
+        #echo set Sampling scheme   = list of points >> inputfile.prm
+        #echo set List of radius    = 6596000 >> inputfile.prm
+        #echo set List of longitude = 38.7578, 174.7633, -157.8583,   85.324, -77.0428,   2.3522, -21.9426, -122.4194, 139.6917,  16.3738 >> inputfile.prm
+        #echo set List of latitude  =  8.9806, -36.8485,   21.3069,  27.7172, -12.0464,  48.8566,  64.1466,   37.7749,  35.6895,  48.2082 >> inputfile.prm
+
+        echo end >> inputfile.prm
+        echo end >> inputfile.prm
+
+        ./aspect inputfile.prm >> opla__${GMR}_${nqextra}
+
+        # rename files
+        mv output/output_gravity/gravity-00000   gravity_${GMR}_${nqextra}.ascii
+        mv output/statistics                     statistics_${GMR}_${nqextra}.ascii
+
+        rm inputfile.prm
+
+    done 
+done 
+
+#cat gravity_*.ascii > profile_gravity_results
+#sed -i '/^#/d' profile_gravity_results
+#sed -i '/^$/d' profile_gravity_results
+#cat statistics_*.ascii > profile_statistics_results
+#sed -i '/^#/d' profile_statistics_results
+#sed -i '/^$/d' profile_statistics_results
+
+cat gravity_*.ascii > map_gravity_results
+sed -i '/^#/d' map_gravity_results
+sed -i '/^$/d' map_gravity_results
+cat statistics_*.ascii > map_statistics_results
+sed -i '/^#/d' map_statistics_results
+sed -i '/^$/d' map_statistics_results
+
+#cat gravity_*.ascii > cities_gravity_results
+#sed -i '/^#/d' cities_gravity_results
+#sed -i '/^$/d' cities_gravity_results
+#cat statistics_*.ascii > cities_statistics_results
+#sed -i '/^#/d' cities_statistics_results
+#sed -i '/^$/d' cities_statistics_results
