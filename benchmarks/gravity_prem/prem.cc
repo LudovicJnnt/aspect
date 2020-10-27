@@ -74,9 +74,9 @@ namespace aspect
                 out.densities[i]=(11.2494-8.0298*x)*1e3;
               else if ((position_point_sph[0] > 5971.e3) && (position_point_sph[0] <= 6151.e3))
                 out.densities[i]=(7.1089-3.8045*x)*1e3;
-              else if ((position_point_sph[0] > 6151.e3) && (position_point_sph[0] <= 6346.e3))
+              else if ((position_point_sph[0] > 6151.e3) && (position_point_sph[0] <= 6346.6e3))
                 out.densities[i]=(2.6910+0.6924*x)*1e3;
-              else if ((position_point_sph[0] > 6346.e3) && (position_point_sph[0] <= 6356.e3))
+              else if ((position_point_sph[0] > 6346.6e3) && (position_point_sph[0] <= 6356.e3))
                 out.densities[i]=2.900*1e3;
               else if ((position_point_sph[0] > 6356.e3) && (position_point_sph[0] <= 6368.e3))
                 out.densities[i]=2.600*1e3;

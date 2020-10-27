@@ -31,16 +31,17 @@ for GMR in 1 2 3 4 ; do
         echo set Reference density           = 3000 >> inputfile.prm
 
         # Parameters profile
-        #echo set Sampling scheme             = map >> inputfile.prm
-        #echo set Minimum radius              = 0   >> inputfile.prm
-        #echo set Maximum radius              = 15000000 >> inputfile.prm
-        #echo set Number points radius        = 151 >> inputfile.prm
-        #echo set Minimum longitude           = 115 >> inputfile.prm
-        #echo set Maximum longitude           = 115 >> inputfile.prm
-        #echo set Number points longitude     = 1   >> inputfile.prm
-        #echo set Minimum latitude            = 87  >> inputfile.prm
-        #echo set Maximum latitude            = 87  >> inputfile.prm
-        #echo set Number points latitude      = 1   >> inputfile.prm
+        echo set Reference density           = 0 >> inputfile.prm
+        echo set Sampling scheme             = map >> inputfile.prm
+        echo set Minimum radius              = 0   >> inputfile.prm
+        echo set Maximum radius              = 15000000 >> inputfile.prm
+        echo set Number points radius        = 151 >> inputfile.prm
+        echo set Minimum longitude           = 115 >> inputfile.prm
+        echo set Maximum longitude           = 115 >> inputfile.prm
+        echo set Number points longitude     = 1   >> inputfile.prm
+        echo set Minimum latitude            = 87  >> inputfile.prm
+        echo set Maximum latitude            = 87  >> inputfile.prm
+        echo set Number points latitude      = 1   >> inputfile.prm
 
         # Parameters map 
         #echo set Sampling scheme             = map >> inputfile.prm
@@ -50,10 +51,10 @@ for GMR in 1 2 3 4 ; do
         #echo set Number points latitude      = 37   >> inputfile.prm
         
         # Parameters fibonacci spiral 
-        echo set Sampling scheme                = fibonacci spiral >> inputfile.prm
-        echo set Number points fibonacci spiral = 2701 >> inputfile.prm
-        echo set Minimum radius                 = 6596000 >> inputfile.prm
-        echo set Number points radius           = 1    >> inputfile.prm
+        #echo set Sampling scheme                = fibonacci spiral >> inputfile.prm
+        #echo set Number points fibonacci spiral = 2701 >> inputfile.prm
+        #echo set Minimum radius                 = 6596000 >> inputfile.prm
+        #echo set Number points radius           = 1    >> inputfile.prm
 
         echo end >> inputfile.prm
         echo end >> inputfile.prm
@@ -69,16 +70,23 @@ for GMR in 1 2 3 4 ; do
     done 
 done 
 
-#cat gravity_*.ascii > B2_map_gravity_results
-#sed -i '/^#/d' B2_map_gravity_results
-#sed -i '/^$/d' B2_map_gravity_results
-#cat statistics_*.ascii > B2_map_statistics_results
-#sed -i '/^#/d' B2_map_statistics_results
-#sed -i '/^$/d' B2_map_statistics_results
+cat gravity_*.ascii > profile_gravity_results
+sed -i '/^#/d' profile_gravity_results
+sed -i '/^$/d' profile_gravity_results
+cat statistics_*.ascii > profile_statistics_results
+sed -i '/^#/d' profile_statistics_results
+sed -i '/^$/d' profile_statistics_results
 
-cat gravity_*.ascii > spiral_gravity_results
-sed -i '/^#/d' spiral_gravity_results
-sed -i '/^$/d' spiral_gravity_results
-cat statistics_*.ascii > B2_map_statistics_results
-sed -i '/^#/d' spiral_statistics_results
-sed -i '/^$/d' spiral_statistics_results
+#cat gravity_*.ascii > map_gravity_results
+#sed -i '/^#/d' map_gravity_results
+#sed -i '/^$/d' map_gravity_results
+#cat statistics_*.ascii > map_statistics_results
+#sed -i '/^#/d' map_statistics_results
+#sed -i '/^$/d' map_statistics_results
+
+#cat gravity_*.ascii > spiral_gravity_results
+#sed -i '/^#/d' spiral_gravity_results
+#sed -i '/^$/d' spiral_gravity_results
+#cat statistics_*.ascii > spiral_statistics_results
+#sed -i '/^#/d' spiral_statistics_results
+#sed -i '/^$/d' spiral_statistics_results
