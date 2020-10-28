@@ -160,6 +160,7 @@ namespace aspect
       MaterialModel::MaterialModelInputs<dim> in(quadrature_formula.size(),this->n_compositional_fields());
       MaterialModel::MaterialModelOutputs<dim> out(quadrature_formula.size(),this->n_compositional_fields());
       unsigned int local_cell_number = 0;
+      double prem_density = 0;
       for (const auto &cell : this->get_dof_handler().active_cell_iterators())
         if (cell->is_locally_owned())
           {
@@ -170,7 +171,36 @@ namespace aspect
             for (unsigned int q = 0; q < n_quadrature_points_per_cell; ++q)
               {
                 density_JxW[local_cell_number * n_quadrature_points_per_cell + q] = out.densities[q] * fe_values.JxW(q);
-                density_anomalies_JxW[local_cell_number * n_quadrature_points_per_cell + q] = (out.densities[q]-reference_density) * fe_values.JxW(q);
+                if (reference_density == 0)
+                  {
+                    const std::array<double,dim> position_point_sph = Utilities::Coordinates::cartesian_to_spherical_coordinates<dim>(in.position[q]);
+                    const double x = position_point_sph[0] / 6371e3;
+                    if (position_point_sph[0] > 6371e3)
+                      prem_density=0;
+                    else if (position_point_sph[0] <= 1221.5e3)
+                      prem_density=(13.0885-8.8381*std::pow(x,2))*1e3;
+                    else if ((position_point_sph[0] > 1221.5e3) && (position_point_sph[0] < 3480.e3))
+                      prem_density=(12.5815-1.2638*x-3.6426*std::pow(x,2)-5.5281*std::pow(x,3))*1e3;
+                    else if ((position_point_sph[0] >= 3480.e3) && (position_point_sph[0] <= 5701.e3))
+                      prem_density=(7.9565-6.4761*x+5.5283*std::pow(x,2)-3.0807*std::pow(x,3))*1e3;
+                    else if ((position_point_sph[0] > 5701.e3) && (position_point_sph[0] <= 5771.e3))
+                      prem_density=(5.3197-1.4836*x)*1e3;
+                    else if ((position_point_sph[0] > 5771.e3) && (position_point_sph[0] <= 5971.e3))
+                      prem_density=(11.2494-8.0298*x)*1e3;
+                    else if ((position_point_sph[0] > 5971.e3) && (position_point_sph[0] <= 6151.e3))
+                      prem_density=(7.1089-3.8045*x)*1e3;
+                    else if ((position_point_sph[0] > 6151.e3) && (position_point_sph[0] <= 6346.6e3))
+                      prem_density=(2.6910+0.6924*x)*1e3;
+                    else if ((position_point_sph[0] > 6346.6e3) && (position_point_sph[0] <= 6356.e3))
+                      prem_density=2.900*1e3;
+                    else if ((position_point_sph[0] > 6356.e3) && (position_point_sph[0] <= 6368.e3))
+                      prem_density=2.600*1e3;
+                    else
+                      prem_density=1.020*1e3;
+                    density_anomalies_JxW[local_cell_number * n_quadrature_points_per_cell + q] = (out.densities[q]-prem_density) * fe_values.JxW(q);
+                  }
+                else
+                  density_anomalies_JxW[local_cell_number * n_quadrature_points_per_cell + q] = (out.densities[q]-reference_density) * fe_values.JxW(q);
                 position_point[local_cell_number * n_quadrature_points_per_cell + q] = position_point_cell[q];
               }
             ++local_cell_number;
@@ -374,87 +404,148 @@ namespace aspect
             min_g_potential = g_potential;
 
           // analytical solution to calculate the theoretical gravity and its derivatives
-          // from a uniform density model. Can only be used if concentric density profile.
+          // from a uniform constant or concentric PREM density model.
           double g_theory = 0;
           double g_potential_theory = 0;
           Tensor<2,dim> g_gradient_theory;
-          double x = satellites_coordinate[p][0]/model_outer_radius;
-          // if reference desnity is 0, the analytical gravity acceleration is calculated
-          // for a full sphere filled with PREM density.
+          // if reference density is 0, the analytical gravity acceleration is calculated
+          //for sphere or spherical shelle filled with PREM density.
           if (reference_density == 0)
             {
-              if (satellites_coordinate[p][0] > 6371e3)
-                g_theory = 4 * 1.838181685*1e3 * numbers::PI * G * std::pow(model_outer_radius,3) / std::pow(satellites_coordinate[p][0], 2);
-              else
+              // Because PREM gravity equations are given for a full sphere, the gravity
+              // acceleration signal of the hollow inner sphere in case of a spherical
+              // shell geometry must be removed from the predicted g_theory.
+              double x_hollow = model_inner_radius/model_outer_radius;
+              double coef_hollow = 0;
+              if ((model_inner_radius > 0) && (model_inner_radius <= 1221.5e3))
                 {
-                  if (satellites_coordinate[p][0] == 0)
-                    g_theory = 0;
-                  else if ((satellites_coordinate[p][0] > 0) && (satellites_coordinate[p][0] <= 1221.5e3))
-                    {
-                      g_theory = 4 * (13.0885*std::pow(x,3)/3 - 8.8381*std::pow(x,5)/5) * 1e3
-                                 * numbers::PI * G * std::pow(model_outer_radius,3) / std::pow(satellites_coordinate[p][0], 2);
-                    }
-                  else if ((satellites_coordinate[p][0] > 1221.5e3) && (satellites_coordinate[p][0] < 3480.e3))
-                    {
-                      double xi = 1221.5e3/model_outer_radius;
-                      g_theory = 4 * (0.0302907 - (12.5815*std::pow(xi,3)/3 - 1.2638*std::pow(xi,4)/4 - 3.6426*std::pow(xi,5)/5 - 5.5281*std::pow(xi,6)/6)
-                                      + 12.5815*std::pow(x,3)/3 - 1.2638*std::pow(x,4)/4 - 3.6426*std::pow(x,5)/5 - 5.5281*std::pow(x,6)/6) * 1e3
-                                 * numbers::PI * G * std::pow(model_outer_radius,3) / std::pow(satellites_coordinate[p][0], 2);
-                    }
-                  else if ((satellites_coordinate[p][0] >= 3480.e3) && (satellites_coordinate[p][0] <= 5701.e3))
-                    {
-                      double xi = 3480e3/model_outer_radius;
-                      g_theory = 4 * (0.5969207 - (7.9565*std::pow(xi,3)/3 - 6.4761*std::pow(xi,4)/4 + 5.5283*std::pow(xi,5)/5 - 3.0807*std::pow(xi,6)/6)
-                                      + 7.9565*std::pow(x,3)/3 - 6.4761*std::pow(x,4)/4 + 5.5283*std::pow(x,5)/5 - 3.0807*std::pow(x,6)/6) * 1e3
-                                 * numbers::PI * G * std::pow(model_outer_radius,3) / std::pow(satellites_coordinate[p][0], 2);
-                    }
-                  else if ((satellites_coordinate[p][0] > 5701.e3) && (satellites_coordinate[p][0] <= 5771.e3))
-                    {
-                      double xi = 5701e3/model_outer_radius;
-                      g_theory = 4 * (1.5014137 - (5.3197*std::pow(xi,3)/3 - 1.4836*std::pow(xi,4)/4)
-                                      + 5.3197*std::pow(x,3)/3 - 1.4836*std::pow(x,4)/4) * 1e3
-                                 * numbers::PI * G * std::pow(model_outer_radius,3) / std::pow(satellites_coordinate[p][0], 2);
-                    }
-                  else if ((satellites_coordinate[p][0] > 5771.e3) && (satellites_coordinate[p][0] <= 5971.e3))
-                    {
-                      double xi = 5771e3/model_outer_radius;
-                      g_theory = 4 * (1.536896 - (11.2494*std::pow(xi,3)/3 - 8.0298*std::pow(xi,4)/4)
-                                      + 11.2494*std::pow(x,3)/3 - 8.0298*std::pow(x,4)/4) * 1e3
-                                 * numbers::PI * G * std::pow(model_outer_radius,3) / std::pow(satellites_coordinate[p][0], 2);
-                    }
-                  else if ((satellites_coordinate[p][0] > 5971.e3) && (satellites_coordinate[p][0] <= 6151.e3))
-                    {
-                      double xi = 5971e3/model_outer_radius;
-                      g_theory = 4 * (1.639496 - (7.1089*std::pow(xi,3)/3 - 3.8045*std::pow(xi,4)/4)
-                                      + 7.1089*std::pow(x,3)/3 - 3.8045*std::pow(x,4)/4) * 1e3
-                                 * numbers::PI * G * std::pow(model_outer_radius,3) / std::pow(satellites_coordinate[p][0], 2);
-                    }
-                  else if ((satellites_coordinate[p][0] > 6151.e3) && (satellites_coordinate[p][0] <= 6346.e3))
-                    {
-                      double xi = 6151e3/model_outer_radius;
-                      g_theory = 4 * (1.7287175 - (2.6910*std::pow(xi,3)/3 + 0.6924*std::pow(xi,4)/4)
-                                      + 2.6910*std::pow(x,3)/3 + 0.6924*std::pow(x,4)/4) * 1e3
-                                 * numbers::PI * G * std::pow(model_outer_radius,3) / std::pow(satellites_coordinate[p][0], 2);
-                    }
-                  else if ((satellites_coordinate[p][0] > 6346.e3) && (satellites_coordinate[p][0] <= 6356.e3))
-                    {
-                      double xi = 6346e3/model_outer_radius;
-                      g_theory = 4 * (1.8282659 - (2.900*std::pow(xi,3)/3) + 2.900*std::pow(x,3)/3) * 1e3
-                                 * numbers::PI * G * std::pow(model_outer_radius,3) / std::pow(satellites_coordinate[p][0], 2);
-                    }
-                  else if ((satellites_coordinate[p][0] > 6356.e3) && (satellites_coordinate[p][0] <= 6368.e3))
-                    {
-                      double xi = 6356e3/model_outer_radius;
-                      g_theory = 4 * (1.83251824 - (2.600*std::pow(xi,3)/3) + 2.600*std::pow(x,3)/3) * 1e3
-                                 * numbers::PI * G * std::pow(model_outer_radius,3) / std::pow(satellites_coordinate[p][0], 2);
-                    }
-                  else
-                    {
-                      double xi = 6368e3/model_outer_radius;
-                      g_theory = 4 * (1.83740161 - (1.020*std::pow(xi,3)/3) + 1.020*std::pow(x,3)/3) * 1e3
-                                 * numbers::PI * G * std::pow(model_outer_radius,3) / std::pow(satellites_coordinate[p][0], 2);
-                    }
+                  coef_hollow = 13.0885*std::pow(x_hollow,3)/3 - 8.8381*std::pow(x_hollow,5)/5;
                 }
+              else if ((model_inner_radius > 1221.5e3) && (model_inner_radius <= 3480.e3))
+                {
+                  double xi = 1221.5e3/model_outer_radius;
+                  coef_hollow = 0.0302907 - (12.5815*std::pow(xi,3)/3 - 1.2638*std::pow(xi,4)/4 - 3.6426*std::pow(xi,5)/5 - 5.5281*std::pow(xi,6)/6)
+                                + 12.5815*std::pow(x_hollow,3)/3 - 1.2638*std::pow(x_hollow,4)/4 - 3.6426*std::pow(x_hollow,5)/5 - 5.5281*std::pow(x_hollow,6)/6;
+                }
+              else if ((model_inner_radius > 3480.e3) && (model_inner_radius <= 5701.e3))
+                {
+                  double xi = 3480e3/model_outer_radius;
+                  coef_hollow = 0.5969207 - (7.9565*std::pow(xi,3)/3 - 6.4761*std::pow(xi,4)/4 + 5.5283*std::pow(xi,5)/5 - 3.0807*std::pow(xi,6)/6)
+                                + 7.9565*std::pow(x_hollow,3)/3 - 6.4761*std::pow(x_hollow,4)/4 + 5.5283*std::pow(x_hollow,5)/5 - 3.0807*std::pow(x_hollow,6)/6;
+                }
+              else if ((model_inner_radius > 5701.e3) && (model_inner_radius <= 5771.e3))
+                {
+                  double xi = 5701e3/model_outer_radius;
+                  coef_hollow = 1.5014137 - (5.3197*std::pow(xi,3)/3 - 1.4836*std::pow(xi,4)/4)
+                                + 5.3197*std::pow(x_hollow,3)/3 - 1.4836*std::pow(x_hollow,4)/4;
+                }
+              else if ((model_inner_radius > 5771.e3) && (model_inner_radius <= 5971.e3))
+                {
+                  double xi = 5771e3/model_outer_radius;
+                  coef_hollow = 1.536896 - (11.2494*std::pow(xi,3)/3 - 8.0298*std::pow(xi,4)/4)
+                                + 11.2494*std::pow(x_hollow,3)/3 - 8.0298*std::pow(x_hollow,4)/4;
+                }
+              else if ((model_inner_radius > 5971.e3) && (model_inner_radius <= 6151.e3))
+                {
+                  double xi = 5971e3/model_outer_radius;
+                  coef_hollow = 1.639496 - (7.1089*std::pow(xi,3)/3 - 3.8045*std::pow(xi,4)/4)
+                                + 7.1089*std::pow(x_hollow,3)/3 - 3.8045*std::pow(x_hollow,4)/4;
+                }
+              else if ((model_inner_radius > 5701.e3) && (model_inner_radius <= 6346.6e3))
+                {
+                  double xi = 6151e3/model_outer_radius;
+                  coef_hollow = 1.7287175 - (2.6910*std::pow(xi,3)/3 + 0.6924*std::pow(xi,4)/4)
+                                + 2.6910*std::pow(x_hollow,3)/3 + 0.6924*std::pow(x_hollow,4)/4;
+                }
+              else if ((model_inner_radius > 6346.6e3) && (model_inner_radius <= 6356.e3))
+                {
+                  double xi = 6346e3/model_outer_radius;
+                  coef_hollow = 1.8282659 - (2.900*std::pow(xi,3)/3) + 2.900*std::pow(x_hollow,3)/3;
+                }
+              else if ((model_inner_radius > 6456.e3) && (model_inner_radius <= 6368.e3))
+                {
+                  double xi = 6356e3/model_outer_radius;
+                  coef_hollow = 1.83251824 - (2.600*std::pow(xi,3)/3) + 2.600*std::pow(x_hollow,3)/3;
+                }
+              else if ((model_inner_radius > 6468.e3) && (model_inner_radius <= 6371.e3))
+                {
+                  double xi = 6368e3/model_outer_radius;
+                  coef_hollow = 1.83740161 - (1.020*std::pow(xi,3)/3) + 1.020*std::pow(x_hollow,3)/3;
+                }
+              else
+                coef_hollow=0;
+              // g_theory is calculated with removal of the inner hollow sphere signal.
+              double x_satellite = satellites_coordinate[p][0]/model_outer_radius;
+              if ((satellites_coordinate[p][0] > 0) && (satellites_coordinate[p][0] <= 1221.5e3))
+                {
+                  g_theory = 4 * (13.0885*std::pow(x_satellite,3)/3 - 8.8381*std::pow(x_satellite,5)/5) * 1e3
+                             * numbers::PI * G * std::pow(model_outer_radius,3) / std::pow(satellites_coordinate[p][0], 2);
+                }
+              else if ((satellites_coordinate[p][0] > 1221.5e3) && (satellites_coordinate[p][0] < 3480.e3))
+                {
+                  double xi = 1221.5e3/model_outer_radius;
+                  g_theory = 4 * ((0.0302907-coef_hollow) - (12.5815*std::pow(xi,3)/3 - 1.2638*std::pow(xi,4)/4 - 3.6426*std::pow(xi,5)/5 - 5.5281*std::pow(xi,6)/6)
+                                  + 12.5815*std::pow(x_satellite,3)/3 - 1.2638*std::pow(x_satellite,4)/4 - 3.6426*std::pow(x_satellite,5)/5 - 5.5281*std::pow(x_satellite,6)/6) * 1e3
+                             * numbers::PI * G * std::pow(model_outer_radius,3) / std::pow(satellites_coordinate[p][0], 2);
+                }
+              else if ((satellites_coordinate[p][0] >= 3480.e3) && (satellites_coordinate[p][0] <= 5701.e3))
+                {
+                  double xi = 3480e3/model_outer_radius;
+                  g_theory = 4 * ((0.5969207-coef_hollow) - (7.9565*std::pow(xi,3)/3 - 6.4761*std::pow(xi,4)/4 + 5.5283*std::pow(xi,5)/5 - 3.0807*std::pow(xi,6)/6)
+                                  + 7.9565*std::pow(x_satellite,3)/3 - 6.4761*std::pow(x_satellite,4)/4 + 5.5283*std::pow(x_satellite,5)/5 - 3.0807*std::pow(x_satellite,6)/6) * 1e3
+                             * numbers::PI * G * std::pow(model_outer_radius,3) / std::pow(satellites_coordinate[p][0], 2);
+                }
+              else if ((satellites_coordinate[p][0] > 5701.e3) && (satellites_coordinate[p][0] <= 5771.e3))
+                {
+                  double xi = 5701e3/model_outer_radius;
+                  g_theory = 4 * ((1.5014137-coef_hollow) - (5.3197*std::pow(xi,3)/3 - 1.4836*std::pow(xi,4)/4)
+                                  + 5.3197*std::pow(x_satellite,3)/3 - 1.4836*std::pow(x_satellite,4)/4) * 1e3
+                             * numbers::PI * G * std::pow(model_outer_radius,3) / std::pow(satellites_coordinate[p][0], 2);
+                }
+              else if ((satellites_coordinate[p][0] > 5771.e3) && (satellites_coordinate[p][0] <= 5971.e3))
+                {
+                  double xi = 5771e3/model_outer_radius;
+                  g_theory = 4 * ((1.536896-coef_hollow) - (11.2494*std::pow(xi,3)/3 - 8.0298*std::pow(xi,4)/4)
+                                  + 11.2494*std::pow(x_satellite,3)/3 - 8.0298*std::pow(x_satellite,4)/4) * 1e3
+                             * numbers::PI * G * std::pow(model_outer_radius,3) / std::pow(satellites_coordinate[p][0], 2);
+                }
+              else if ((satellites_coordinate[p][0] > 5971.e3) && (satellites_coordinate[p][0] <= 6151.e3))
+                {
+                  double xi = 5971e3/model_outer_radius;
+                  g_theory = 4 * ((1.639496-coef_hollow) - (7.1089*std::pow(xi,3)/3 - 3.8045*std::pow(xi,4)/4)
+                                  + 7.1089*std::pow(x_satellite,3)/3 - 3.8045*std::pow(x_satellite,4)/4) * 1e3
+                             * numbers::PI * G * std::pow(model_outer_radius,3) / std::pow(satellites_coordinate[p][0], 2);
+                }
+              else if ((satellites_coordinate[p][0] > 6151.e3) && (satellites_coordinate[p][0] <= 6346.6e3))
+                {
+                  double xi = 6151e3/model_outer_radius;
+                  g_theory = 4 * ((1.7287175-coef_hollow) - (2.6910*std::pow(xi,3)/3 + 0.6924*std::pow(xi,4)/4)
+                                  + 2.6910*std::pow(x_satellite,3)/3 + 0.6924*std::pow(x_satellite,4)/4) * 1e3
+                             * numbers::PI * G * std::pow(model_outer_radius,3) / std::pow(satellites_coordinate[p][0], 2);
+                }
+              else if ((satellites_coordinate[p][0] > 6346.6e3) && (satellites_coordinate[p][0] <= 6356.e3))
+                {
+                  double xi = 6346e3/model_outer_radius;
+                  g_theory = 4 * ((1.8282659-coef_hollow) - (2.900*std::pow(xi,3)/3) + 2.900*std::pow(x_satellite,3)/3) * 1e3
+                             * numbers::PI * G * std::pow(model_outer_radius,3) / std::pow(satellites_coordinate[p][0], 2);
+                }
+              else if ((satellites_coordinate[p][0] > 6356.e3) && (satellites_coordinate[p][0] <= 6368.e3))
+                {
+                  double xi = 6356e3/model_outer_radius;
+                  g_theory = 4 * ((1.83251824-coef_hollow) - (2.600*std::pow(xi,3)/3) + 2.600*std::pow(x_satellite,3)/3) * 1e3
+                             * numbers::PI * G * std::pow(model_outer_radius,3) / std::pow(satellites_coordinate[p][0], 2);
+                }
+              else if ((satellites_coordinate[p][0] > 6368.e3) && (satellites_coordinate[p][0] <= 6371.e3))
+                {
+                  double xi = 6368e3/model_outer_radius;
+                  g_theory = 4 * ((1.83740161-coef_hollow) - (1.020*std::pow(xi,3)/3) + 1.020*std::pow(x_satellite,3)/3) * 1e3
+                             * numbers::PI * G * std::pow(model_outer_radius,3) / std::pow(satellites_coordinate[p][0], 2);
+                }
+              else
+                g_theory = 4 * (1.838181685-coef_hollow)*1e3 * numbers::PI * G * std::pow(model_outer_radius,3) / std::pow(satellites_coordinate[p][0], 2);
+              // g_theory is 0 in the hollow inner sphere.
+              if (satellites_coordinate[p][0] <= model_inner_radius)
+                g_theory=0;
             }
           // if reference desnity > 0, the analytical gravity acceleration is calculated
           // for a domain filled with the specified constant density. Is also calculated

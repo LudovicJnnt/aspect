@@ -88,6 +88,7 @@ subsection Postprocess
 # at the 'random' spherical coordinate [R,115,87]
   subsection Gravity calculation
     set Sampling scheme             = map
+    set Reference density           = 0
    
     # The density is evaluated at the quadrature points. You
     # may increase the base number of quadrature points:
