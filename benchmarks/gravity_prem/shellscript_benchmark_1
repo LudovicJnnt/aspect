@@ -7,8 +7,8 @@ rm opla_*
 rm gravity_res*
 rm statistics_res*
 
-for GMR in 3 ; do
-    for nqextra in 3 ; do
+for GMR in 1 2 3 ; do
+    for nqextra in 3 5 7 ; do
 
         cp benchmark_1.prm inputfile.prm 
 

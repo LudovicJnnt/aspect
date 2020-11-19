@@ -7,7 +7,7 @@ rm opla_*
 rm gravity_res*
 rm statistics_res*
 
-for GMR in 1 2 3 4 ; do
+for GMR in 4 ; do
     for nqextra in 0 1 2 3 4 5 6 7 ; do
 
         cp benchmark_2.prm inputfile.prm 
@@ -28,19 +28,19 @@ for GMR in 1 2 3 4 ; do
         echo set List of postprocessors = basic statistics, material statistics, gravity calculation >> inputfile.prm
         echo subsection Gravity calculation >> inputfile.prm
         echo set Quadrature degree increase  = ${nqextra} >> inputfile.prm
-        echo set Reference density           = 3000 >> inputfile.prm
+        echo set Reference density           = 0 >> inputfile.prm
 
         # Parameters profile
         echo set Reference density           = 0 >> inputfile.prm
         echo set Sampling scheme             = map >> inputfile.prm
         echo set Minimum radius              = 0   >> inputfile.prm
         echo set Maximum radius              = 15000000 >> inputfile.prm
-        echo set Number points radius        = 151 >> inputfile.prm
-        echo set Minimum longitude           = 115 >> inputfile.prm
-        echo set Maximum longitude           = 115 >> inputfile.prm
+        echo set Number points radius        = 101 >> inputfile.prm
+        echo set Minimum longitude           = 115 >> inputfile.prm #115
+        echo set Maximum longitude           = 115 >> inputfile.prm #115
         echo set Number points longitude     = 1   >> inputfile.prm
-        echo set Minimum latitude            = 87  >> inputfile.prm
-        echo set Maximum latitude            = 87  >> inputfile.prm
+        echo set Minimum latitude            = 87  >> inputfile.prm #87
+        echo set Maximum latitude            = 87  >> inputfile.prm #87
         echo set Number points latitude      = 1   >> inputfile.prm
 
         # Parameters map 
